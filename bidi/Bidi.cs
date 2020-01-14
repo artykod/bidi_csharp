@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 public class Bidi
@@ -6,7 +7,7 @@ public class Bidi
     public string Convert(string str)
     {
         PrintWriter writer = new PrintWriter();
-        BidiReferenceTestCharmap charmap = BidiReferenceTestCharmap.TEST_PBA;
+        BidiReferenceTestCharmap charmap = BidiReferenceTestCharmap.TEST_MIXED_PBA;
         sbyte baseDirection = BidiReference.implicitEmbeddingLevel;
         byte doPBATest = 1;
 
@@ -18,19 +19,29 @@ public class Bidi
             int[] pbValues = map.getBracketValues(str);
 
             BidiReference bidi = new BidiReference(codes, pbTypes, pbValues, baseDirection);
-            int[] reorder = bidi.getReordering(new int[] { codes.Length });
+
+            var breaksSet = new HashSet<int> { codes.Length };
+
+            for (int i = 0; i < str.Length; ++i)
+            {
+                if (str[i] == '\n')
+                {
+                    if (i > 0)
+                    {
+                        breaksSet.Add(str[i - 1] == '\r' ? i - 1 : i);
+                    }
+                    breaksSet.Add(i + 1);
+                }
+            }
+
+            var breaksList = new List<int>(breaksSet);
+            breaksList.Sort();
+
+            int[] reorder = bidi.getReordering(breaksList.ToArray());
 
             writer.println("base level: " + bidi.getBaseLevel() + (baseDirection != BidiReference.implicitEmbeddingLevel ? " (forced)" : ""));
 
-            var sbInput = new StringBuilder(str.Length);
             var sbOutput = new StringBuilder(str.Length);
-
-            // output original text
-            for (int i = 0; i < str.Length; ++i)
-            {
-                sbInput.Append(str[i]);
-            }
-            writer.println();
 
             if (doPBATest == 1)
             {
@@ -50,7 +61,7 @@ public class Bidi
             }
             writer.println();
 
-            var input = sbInput.ToString();
+            var input = str;
             var output = sbOutput.ToString();
 
             return output;

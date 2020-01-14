@@ -32,6 +32,8 @@ public abstract class BidiReferenceTestCharmap
     /** Charmap instance that maps portions of ASCII to R, and brackets to ON for PBA. */
     public static readonly BidiReferenceTestCharmap TEST_PBA = new TestPBA();
 
+    public static readonly BidiReferenceTestCharmap TEST_MIXED_PBA = new TestMixedPBA();
+
 
     private const sbyte L = BidiReference.L;
     private const sbyte LRE = BidiReference.LRE;
@@ -416,4 +418,12 @@ public abstract class BidiReferenceTestCharmap
         }
     }
 
+    public class TestMixedPBA : DefaultCharmap
+    {
+        public TestMixedPBA() : base("")
+        {
+            setMap(L, "\n\r");
+            setMap(R, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        }
+    }
 }

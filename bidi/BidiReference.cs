@@ -93,7 +93,7 @@ using System;
 public class BidiReference
 {
     private readonly sbyte[] initialTypes;
-    public const sbyte implicitEmbeddingLevel = 2; // level will be determined implicitly
+    public const sbyte implicitEmbeddingLevel = 1; // level will be determined implicitly (equals 2 in stock example)
     private sbyte paragraphEmbeddingLevel = implicitEmbeddingLevel;
 
     private int textLength; // for convenience
