@@ -93,7 +93,7 @@ using System;
 public class BidiReference
 {
     private readonly sbyte[] initialTypes;
-    public const sbyte implicitEmbeddingLevel = 1; // level will be determined implicitly (equals 2 in stock example)
+    public const sbyte implicitEmbeddingLevel = 2; // level will be determined implicitly
     private sbyte paragraphEmbeddingLevel = implicitEmbeddingLevel;
 
     private int textLength; // for convenience
@@ -672,6 +672,7 @@ public class BidiReference
                     // These values are reset for clarity, in this implementation B
                     // can only occur as the last code in the array.
                     stack.empty();
+                    stack.push(paragraphEmbeddingLevel, ON, false);
                     overflowIsolateCount = 0;
                     overflowEmbeddingCount = 0;
                     validIsolateCount = 0;
@@ -941,11 +942,11 @@ public class BidiReference
             for (int i = 0; i < length; ++i)
             {
                 sbyte t = types[i];
-                if (t == WS || t == ON || t == B || t == S || t == RLI || t == LRI || t == FSI || t == PDI)
+                if (t == WS || t == ON || /*t == B || */t == S || t == RLI || t == LRI || t == FSI || t == PDI)
                 {
                     // find bounds of run of neutrals
                     int runstart = i;
-                    int runlimit = findRunLimit(runstart, length, new sbyte[] { B, S, WS, ON, RLI, LRI, FSI, PDI });
+                    int runlimit = findRunLimit(runstart, length, new sbyte[] { /*B, */S, WS, ON, RLI, LRI, FSI, PDI });
 
                     // determine effective types at ends of run
                     sbyte leadingType;
@@ -1602,7 +1603,7 @@ public class BidiReference
         {
             if (types[i] == B)
             {
-                throw new ArgumentException("B type before end of paragraph at index: " + i);
+                //throw new ArgumentException("B type before end of paragraph at index: " + i);
             }
         }
     }

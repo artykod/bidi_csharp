@@ -4,21 +4,26 @@ using System.Text;
 
 public class Bidi
 {
+    private readonly bool showDetails;
+
+    public Bidi(bool showDetails)
+    {
+        this.showDetails = showDetails;
+    }
+
     public string Convert(string str)
     {
-        PrintWriter writer = new PrintWriter();
-        BidiReferenceTestCharmap charmap = BidiReferenceTestCharmap.TEST_MIXED_PBA;
-        sbyte baseDirection = BidiReference.implicitEmbeddingLevel;
-        byte doPBATest = 1;
+        var writer = new PrintWriter();
+        var charmap = BidiReferenceTestCharmap.TEST_MIXED_PBA;
+        var baseDirection = (sbyte)1; // force RTL
 
         try
         {
-            sbyte[] codes = charmap.getCodes(str);
-            BidiTestBracketMap map = BidiTestBracketMap.TEST_BRACKETS;
-            sbyte[] pbTypes = map.getBracketTypes(str);
-            int[] pbValues = map.getBracketValues(str);
-
-            BidiReference bidi = new BidiReference(codes, pbTypes, pbValues, baseDirection);
+            var codes = charmap.getCodes(str);
+            var map = BidiTestBracketMap.TEST_BRACKETS;
+            var pbTypes = map.getBracketTypes(str);
+            var pbValues = map.getBracketValues(str);
+            var bidi = new BidiReference(codes, pbTypes, pbValues, baseDirection);
 
             var breaksSet = new HashSet<int> { codes.Length };
 
@@ -37,29 +42,29 @@ public class Bidi
             var breaksList = new List<int>(breaksSet);
             breaksList.Sort();
 
-            int[] reorder = bidi.getReordering(breaksList.ToArray());
-
-            writer.println("base level: " + bidi.getBaseLevel() + (baseDirection != BidiReference.implicitEmbeddingLevel ? " (forced)" : ""));
-
-            var sbOutput = new StringBuilder(str.Length);
-
-            if (doPBATest == 1)
-            {
-                // report on paired bracket algorithm
-                writer.println();
-                writer.println("bracket pairs at:\n" + bidi.pba.getPairPositionsString()); /*bidi.pba.pairPositions.toString()*/
-                writer.println("(last isolated run sequence processed, in relative offsets)");
-                writer.println();
-                writer.print("resolved directional types: ");
-                charmap.dumpCodes(writer, bidi.getResultTypes());
-            }
+            var reorder = bidi.getReordering(breaksList.ToArray());
 
             // output visually ordered text
+            var sbOutput = new StringBuilder(str.Length);
             for (int i = 0; i < str.Length; ++i)
             {
                 sbOutput.Append(str[reorder[i]]);
             }
-            writer.println();
+
+            if (showDetails)
+            {
+                writer.println("base level: " + bidi.getBaseLevel() + (baseDirection != BidiReference.implicitEmbeddingLevel ? " (forced)" : ""));
+                writer.println();
+
+                // report on paired bracket algorithm
+                writer.println("bracket pairs at:\n" + bidi.pba.getPairPositionsString()); /*bidi.pba.pairPositions.toString()*/
+                writer.println("(last isolated run sequence processed, in relative offsets)");
+                writer.println();
+
+                writer.print("resolved directional types:\n");
+                charmap.dumpCodes(writer, bidi.getResultTypes());
+                writer.println();
+            }
 
             var input = str;
             var output = sbOutput.ToString();

@@ -422,8 +422,27 @@ public abstract class BidiReferenceTestCharmap
     {
         public TestMixedPBA() : base("")
         {
-            setMap(L, "\n\r");
-            setMap(R, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        }
+
+        public override void convert(char[] chars, int charStart, sbyte[] codes, int codeStart, int count)
+        {
+            for (int i = 0; i < count; ++i)
+            {
+                codes[codeStart + i] = getCode(chars[charStart + i]);
+            }
+        }
+
+        private sbyte getCode(char ch)
+        {
+            if (-1 <= ch && ch < baseMap.Length)
+            {
+                return baseMap[ch];
+            }
+            if ('\u0600' <= ch && ch <= '\u06FF')
+            {
+                return R;
+            }
+            return L;
         }
     }
 }

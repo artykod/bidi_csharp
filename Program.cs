@@ -6,12 +6,17 @@ namespace BidiTest
     {
         static void Main()
         {
-            var input = @"XY, ZW.
-ABC DEF? hello (world).
-abc def, why so fsh?
-QWE RTY!
+            Console.OutputEncoding = System.Text.Encoding.Unicode;
+
+            var input = @"ضص, شس.
+ءيب (الب)? hello world.
+abc [def], why {so} fsh?
+انق ثقفغ!
 huihu 123.";
-            var output = new Bidi().Convert(input);
+
+            //var input = @"ضص, شس. ءيب الب? hello world. abc def, why so fsh? انق ثقفغ! huihu 123.";
+
+            var output = new Bidi(true).Convert(input);
 
             Console.WriteLine($"input:\n{input}");
             Console.WriteLine();
