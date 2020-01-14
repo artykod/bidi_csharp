@@ -96,9 +96,9 @@ public class BidiReference
     public const sbyte implicitEmbeddingLevel = 2; // level will be determined implicitly
     private sbyte paragraphEmbeddingLevel = implicitEmbeddingLevel;
 
-    private int textLength; // for convenience
-    private sbyte[] resultTypes; // for paragraph, not lines
-    private sbyte[] resultLevels; // for paragraph, not lines
+    public int textLength; // for convenience
+    public sbyte[] resultTypes; // for paragraph, not lines
+    public sbyte[] resultLevels; // for paragraph, not lines
 
     public sbyte[] getResultTypes()
     {
