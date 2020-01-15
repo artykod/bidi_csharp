@@ -28,12 +28,12 @@ public class Bidi
 
     public int LogicalToVisualCaretPosition(string input, int caret)
     {
-        if (!BidiApply(input, out var bidi, out _, out var logicalToVisual))
+        if (!BidiApply(input, out var directions, out _, out var logicalToVisual))
         {
             return caret;
         }
 
-        if (caret <= 0 || input[caret - 1] == '\n')
+        if (caret <= 0 || input[caret - 1] == '\n') // TODO all linebreaks?
         {
             for (int i = caret; i < input.Length; ++i)
             {
@@ -45,7 +45,7 @@ public class Bidi
             return input.Length;
         }
 
-        if (caret >= input.Length || input[caret] == '\n')
+        if (caret >= input.Length || input[caret] == '\n') // TODO all linebreaks?
         {
             for (int i = caret - 1; i >= 0; --i)
             {
@@ -57,21 +57,21 @@ public class Bidi
             return 0;
         }
 
-        return bidi.resultTypes[caret] == BidiReference.R
+        return directions[caret] == BidiReference.R
             ? logicalToVisual[caret] + 1
-            : bidi.resultTypes[caret - 1] == BidiReference.R
+            : directions[caret - 1] == BidiReference.R
                 ? logicalToVisual[caret - 1]
                 : logicalToVisual[caret];
     }
 
     public int VisualToLogicalCaretPosition(string input, int caret)
     {
-        if (!BidiApply(input, out var bidi, out var visualToLogical, out _))
+        if (!BidiApply(input, out var directions, out var visualToLogical, out _))
         {
             return caret;
         }
 
-        if (caret <= 0 || input[visualToLogical[caret - 1]] == '\n')
+        if (caret <= 0 || input[visualToLogical[caret - 1]] == '\n') // TODO all linebreaks?
         {
             for (int i = caret; i < input.Length; ++i)
             {
@@ -83,7 +83,7 @@ public class Bidi
             return input.Length;
         }
 
-        if (caret >= input.Length || input[visualToLogical[caret]] == '\n')
+        if (caret >= input.Length || input[visualToLogical[caret]] == '\n') // TODO all linebreaks?
         {
             for (int i = caret - 1; i >= 0; --i)
             {
@@ -95,9 +95,9 @@ public class Bidi
             return 0;
         }
 
-        return bidi.resultTypes[visualToLogical[caret]] == BidiReference.R
+        return directions[visualToLogical[caret]] == BidiReference.R
             ? visualToLogical[caret] + 1
-            : bidi.resultTypes[visualToLogical[caret - 1]] == BidiReference.R
+            : directions[visualToLogical[caret - 1]] == BidiReference.R
                 ? visualToLogical[caret - 1]
                 : visualToLogical[caret];
     }
@@ -112,9 +112,9 @@ public class Bidi
         return logicalToVisual[selection];
     }
 
-    private bool BidiApply(string input, out BidiReference bidi, out int[] visualToLogical, out int[] logicalToVisual)
+    private bool BidiApply(string input, out sbyte[] directions, out int[] visualToLogical, out int[] logicalToVisual)
     {
-        bidi = null;
+        directions = null;
         visualToLogical = null;
         logicalToVisual = null;
 
@@ -142,7 +142,8 @@ public class Bidi
             }
 
             // TODO optimize Bidi algorithm
-            bidi = new BidiReference(chCodes, pbTypes, pbValues, baseDirection);
+            var bidi = new BidiReference(chCodes, pbTypes, pbValues, baseDirection);
+            directions = bidi.resultTypes;
             visualToLogical = bidi.getReordering(new List<int>(linebreaksSet).ToArray());
             logicalToVisual = new int[visualToLogical.Length];
 
@@ -150,6 +151,8 @@ public class Bidi
             {
                 logicalToVisual[visualToLogical[i]] = i;
             }
+
+            // TODO fix paired brackets inversion
 
             if (_showDetails)
             {
